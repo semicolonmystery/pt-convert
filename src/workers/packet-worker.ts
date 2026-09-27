@@ -1,28 +1,28 @@
 import { decryptPacket, encryptXml } from "@/lib/packet-crypto";
-import { simplifyXmlForLlm, type SimplifierMetadata } from "@/lib/xml-simplifier";
-
-type Req =
-  | { id: number; op: "encrypt"; bytes: ArrayBuffer }
-  | { id: number; op: "decrypt"; bytes: ArrayBuffer }
-  | { id: number; op: "simplify"; xmlText: string; meta: SimplifierMetadata };
+import { simplifyXmlForLlm } from "@/lib/xml-simplifier";
+import type { WorkerRequest, WorkerResponse } from "@/workers/packet-worker-protocol";
 
 const worker = self as unknown as Worker;
 
-worker.onmessage = (ev: MessageEvent<Req>) => {
+function reply(message: WorkerResponse, transfer: Transferable[] = []): void {
+  worker.postMessage(message, transfer);
+}
+
+worker.onmessage = (ev: MessageEvent<WorkerRequest & { id: number }>) => {
   const m = ev.data;
   try {
     if (m.op === "encrypt") {
       const out = encryptXml(new Uint8Array(m.bytes));
-      worker.postMessage({ id: m.id, ok: true, bytes: out.buffer }, [out.buffer]);
+      reply({ id: m.id, ok: true, bytes: out.buffer as ArrayBuffer }, [out.buffer]);
     } else if (m.op === "decrypt") {
       const out = decryptPacket(new Uint8Array(m.bytes));
-      worker.postMessage({ id: m.id, ok: true, bytes: out.buffer }, [out.buffer]);
+      reply({ id: m.id, ok: true, bytes: out.buffer as ArrayBuffer }, [out.buffer]);
     } else {
       const json = simplifyXmlForLlm(m.xmlText, m.meta);
-      worker.postMessage({ id: m.id, ok: true, json });
+      reply({ id: m.id, ok: true, json });
     }
   } catch (err) {
-    worker.postMessage({
+    reply({
       id: m.id,
       ok: false,
       error: err instanceof Error ? err.message : "Worker error",

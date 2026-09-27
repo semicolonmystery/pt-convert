@@ -1,31 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
+import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const SITE_NAME = "Packet Tracer Converter";
-const SITE_DESCRIPTION =
-  "Convert Cisco Packet Tracer .pkt and .pka files to readable XML or LLM-friendly JSON in your browser. Encrypt XML back to .pkt. Free, client-side, no upload.";
-
 export const metadata: Metadata = {
-  metadataBase: new URL("https://pt-convert.podik.cz"),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} — Convert PKT, PKA & XML Online`,
+    default: SITE_TITLE,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
@@ -60,13 +47,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
-    title: `${SITE_NAME} — Convert PKT, PKA & XML Online`,
+    title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     url: "/",
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE_NAME} — Convert PKT, PKA & XML Online`,
+    title: SITE_TITLE,
     description: SITE_DESCRIPTION,
   },
   robots: {
@@ -96,6 +83,10 @@ const jsonLd = {
   "@type": "SoftwareApplication",
   name: SITE_NAME,
   description: SITE_DESCRIPTION,
+  url: `${SITE_URL}/`,
+  image: `${SITE_URL}/opengraph-image`,
+  author: { "@type": "Person", name: "Semicolon Mystery" },
+  isAccessibleForFree: true,
   applicationCategory: "DeveloperApplication",
   operatingSystem: "Any (browser-based)",
   browserRequirements: "Requires a modern browser with JavaScript enabled.",
@@ -105,7 +96,7 @@ const jsonLd = {
     priceCurrency: "USD",
   },
   featureList: [
-    "Decrypt .pkt files to native XML",
+    "Decrypt .pkt and .pka files to native XML",
     "Decrypt .pkt and .pka files to LLM-friendly JSON",
     "Encrypt XML back into the Packet Tracer .pkt container",
     "Fully client-side — no upload, no server",
@@ -124,23 +115,15 @@ export default function RootLayout({
       className={cn(
         "h-full",
         "antialiased",
-        geistSans.variable,
-        geistMono.variable,
         "font-mono",
         jetbrainsMono.variable,
       )}
     >
-      <head>
-        <meta
-          property="og:logo"
-          content="https://pt-convert.podik.cz/icon.svg"
-        />
+      <body className="min-h-full flex flex-col">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
         />
-      </head>
-      <body className="min-h-full flex flex-col">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

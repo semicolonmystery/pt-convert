@@ -40,6 +40,16 @@ function readText(node: unknown): string {
   return "";
 }
 
+function readLines(node: unknown): string[] {
+  return asArray((node as JsonLike | undefined)?.LINE).map((line) => readText(line)).filter(Boolean);
+}
+
+function getDeviceEngines(packetTracer: JsonLike): JsonLike[] {
+  const network = (packetTracer.NETWORK as JsonLike | undefined) ?? {};
+  const deviceNodes = asArray((network.DEVICES as JsonLike | undefined)?.DEVICE as JsonLike[] | JsonLike);
+  return deviceNodes.map((deviceNode) => (deviceNode.ENGINE as JsonLike | undefined) ?? {});
+}
+
 function toNumber(value: unknown): number | null {
   const parsed = Number.parseFloat(readText(value));
   return Number.isFinite(parsed) ? parsed : null;
@@ -123,19 +133,11 @@ function extractDeviceConfig(engine: JsonLike): string[] {
   const startupConfigNode = (engine.STARTUPCONFIG as JsonLike | undefined) ?? {};
   const configNode = (engine.CONFIG as JsonLike | undefined) ?? {};
 
-  const runningLines = asArray(runningConfigNode.LINE).map((line) => readText(line)).filter(Boolean);
-  if (runningLines.length > 0) {
-    return runningLines;
-  }
-
-  const configLines = asArray(configNode.LINE).map((line) => readText(line)).filter(Boolean);
-  if (configLines.length > 0) {
-    return configLines;
-  }
-
-  const startupLines = asArray(startupConfigNode.LINE).map((line) => readText(line)).filter(Boolean);
-  if (startupLines.length > 0) {
-    return startupLines;
+  for (const node of [runningConfigNode, configNode, startupConfigNode]) {
+    const lines = readLines(node);
+    if (lines.length > 0) {
+      return lines;
+    }
   }
 
   const cfgText = readText(runningConfigNode) || readText(configNode) || readText(startupConfigNode);
@@ -168,12 +170,9 @@ function extractVtp(engine: JsonLike): JsonLike | null {
 }
 
 function extractDevices(packetTracer: JsonLike): Record<string, JsonLike> {
-  const network = (packetTracer.NETWORK as JsonLike | undefined) ?? {};
-  const deviceNodes = asArray((network.DEVICES as JsonLike | undefined)?.DEVICE as JsonLike[] | JsonLike);
   const devices: Record<string, JsonLike> = {};
 
-  for (const deviceNode of deviceNodes) {
-    const engine = (deviceNode.ENGINE as JsonLike | undefined) ?? {};
+  for (const engine of getDeviceEngines(packetTracer)) {
     const name = readText(engine.NAME) || `Device ${Object.keys(devices).length + 1}`;
     const x = toNumber((engine.COORD_SETTINGS as JsonLike | undefined)?.X_COORD);
     const y = toNumber((engine.COORD_SETTINGS as JsonLike | undefined)?.Y_COORD);
@@ -206,9 +205,7 @@ function extractDevices(packetTracer: JsonLike): Record<string, JsonLike> {
     if (vtp) {
       device.vtp = vtp;
     }
-    const startupConfig = asArray(((engine.STARTUPCONFIG as JsonLike | undefined)?.LINE as unknown[] | undefined))
-      .map((line) => readText(line))
-      .filter(Boolean);
+    const startupConfig = readLines(engine.STARTUPCONFIG);
     if (startupConfig.length > 0) {
       device.startupConfig = startupConfig;
     }
@@ -220,11 +217,8 @@ function extractDevices(packetTracer: JsonLike): Record<string, JsonLike> {
 }
 
 function buildRefMap(packetTracer: JsonLike): Record<string, string> {
-  const network = (packetTracer.NETWORK as JsonLike | undefined) ?? {};
-  const deviceNodes = asArray((network.DEVICES as JsonLike | undefined)?.DEVICE as JsonLike[] | JsonLike);
   const refs: Record<string, string> = {};
-  for (const deviceNode of deviceNodes) {
-    const engine = (deviceNode.ENGINE as JsonLike | undefined) ?? {};
+  for (const engine of getDeviceEngines(packetTracer)) {
     const ref = readText(engine.SAVE_REF_ID);
     const name = readText(engine.NAME);
     if (ref && name) {
