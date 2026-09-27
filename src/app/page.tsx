@@ -185,7 +185,7 @@ export default function Home() {
 
   return (
     <main className="flex w-full flex-col">
-      <div className="relative flex min-h-screen w-full items-center justify-center p-4">
+      <div className="relative flex min-h-screen w-full snap-start items-center justify-center p-4">
         <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between p-4 md:p-6">
           <div className="pointer-events-auto">
             <Dialog>
@@ -487,7 +487,7 @@ const FAQ: { question: string; answer: string }[] = [
 
 function AboutSection() {
   return (
-    <section className="mx-auto w-full max-w-3xl space-y-4 px-4 pb-12 text-sm text-muted-foreground">
+    <section className="mx-auto flex min-h-screen w-full max-w-3xl snap-start flex-col justify-center gap-4 px-4 py-12 text-sm text-muted-foreground">
       <h2 className="text-base font-medium text-foreground">Packet Tracer labs as AI context</h2>
       <p>
         A screenshot of a Packet Tracer lab gives an AI a picture to guess from, and the .pkt itself is encrypted,

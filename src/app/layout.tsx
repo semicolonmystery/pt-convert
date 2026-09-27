@@ -114,6 +114,8 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn(
         "h-full",
+        "snap-y",
+        "snap-mandatory",
         "antialiased",
         "font-mono",
         jetbrainsMono.variable,

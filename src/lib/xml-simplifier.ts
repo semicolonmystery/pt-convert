@@ -291,7 +291,7 @@ function extractActivityInstructions(activityRoot: JsonLike, packetTracer: JsonL
   return Array.from(new Set(candidates));
 }
 
-export function simplifyXmlForLlm(xml: string, source: SimplifierMetadata): SimplifiedPacket {
+export function simplifyXmlToJson(xml: string, source: SimplifierMetadata): SimplifiedPacket {
   const { packetTracer, activityRoot } = parseRoot(xml);
   const devices = extractDevices(packetTracer);
   const links = extractLinks(packetTracer);

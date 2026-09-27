@@ -6,6 +6,8 @@ Client-side Packet Tracer converter built with Next.js + shadcn/ui.
 
 **Live site:** [pt-convert.podik.cz](https://pt-convert.podik.cz)
 
+![Packet Tracer Converter demo: a .pka file is decrypted to JSON and attached to an AI chat](docs/demo.gif)
+
 It can:
 
 - Encrypt `.xml` -> `.pkt`

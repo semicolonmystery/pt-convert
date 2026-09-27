@@ -1,5 +1,5 @@
 import { decryptPacket, encryptXml } from "@/lib/packet-crypto";
-import { simplifyXmlForLlm } from "@/lib/xml-simplifier";
+import { simplifyXmlToJson } from "@/lib/xml-simplifier";
 import type { WorkerRequest, WorkerResponse } from "@/workers/packet-worker-protocol";
 
 const worker = self as unknown as Worker;
@@ -18,7 +18,7 @@ worker.onmessage = (ev: MessageEvent<WorkerRequest & { id: number }>) => {
       const out = decryptPacket(new Uint8Array(m.bytes));
       reply({ id: m.id, ok: true, bytes: out.buffer as ArrayBuffer }, [out.buffer]);
     } else {
-      const json = simplifyXmlForLlm(m.xmlText, m.meta);
+      const json = simplifyXmlToJson(m.xmlText, m.meta);
       reply({ id: m.id, ok: true, json });
     }
   } catch (err) {
