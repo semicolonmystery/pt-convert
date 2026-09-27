@@ -10,7 +10,7 @@ It can:
 
 - Encrypt `.xml` -> `.pkt`
 - Decrypt `.pkt` / `.pka` -> `.xml`
-- Decrypt `.pkt` / `.pka` -> simplified `.json` (LLM-friendly)
+- Decrypt `.pkt` / `.pka` -> simplified `.json` (AI-friendly)
 
 All processing happens in the browser. No server-side file processing is used.
 
@@ -27,7 +27,7 @@ Drop an `.xml`, `.pkt`, or `.pka` file and pick the direction:
 
 - **`.xml` -> `.pkt`** — packs your raw XML topology back into a Packet Tracer container so it opens in the app.
 - **`.pkt` / `.pka` -> `.xml`** — unpacks the container and gives you the raw XML the app uses internally, with no loss of fidelity.
-- **`.pkt` / `.pka` -> simplified JSON** — unpacks the file and then projects the topology (devices, links, notes, metadata) into a compact JSON shape that's easier for LLMs to read and reason about. You can toggle pretty-printing, indentation, and whether to keep file metadata.
+- **`.pkt` / `.pka` -> simplified JSON** — unpacks the file and then projects the topology (devices, links, notes, metadata) into a compact JSON shape that's easier for AI to read and reason about. You can toggle pretty-printing, indentation, and whether to keep file metadata.
 
 Encryption and decryption, plus the XML-to-JSON simplification, run inside a module Web Worker, so the page never freezes — you can scroll, switch theme, or pick another file while a large `.pkt` is processing.
 

@@ -97,7 +97,7 @@ const jsonLd = {
   },
   featureList: [
     "Decrypt .pkt and .pka files to native XML",
-    "Decrypt .pkt and .pka files to LLM-friendly JSON",
+    "Decrypt .pkt and .pka files to AI-friendly JSON",
     "Encrypt XML back into the Packet Tracer .pkt container",
     "Fully client-side — no upload, no server",
   ],

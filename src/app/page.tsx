@@ -186,7 +186,6 @@ export default function Home() {
   return (
     <main className="flex w-full flex-col">
       <div className="relative flex min-h-screen w-full items-center justify-center p-4">
-        <h1 className="sr-only">Packet Tracer Converter — turn .pkt and .pka files into JSON context for LLMs</h1>
         <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between p-4 md:p-6">
           <div className="pointer-events-auto">
             <Dialog>
@@ -202,12 +201,12 @@ export default function Home() {
                   <DialogTitle>What this tool is for</DialogTitle>
                   <DialogDescription>
                     This app converts Packet Tracer files fully in your browser. It helps you decrypt `.pkt/.pka` to
-                    native XML or to simplified JSON that is easier for LLMs to reason about.
+                    native XML or to simplified JSON that is easier for AI to reason about.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-2 text-sm text-muted-foreground">
                   <p>1. Drop a `.pkt/.pka` file and pick JSON or XML output.</p>
-                  <p>2. For LLM work, choose JSON and keep metadata enabled.</p>
+                  <p>2. For AI work, choose JSON and keep metadata enabled.</p>
                   <p>3. Download the result and feed JSON into your model for topology analysis.</p>
                   <p>4. Drop `.xml` when you want to re-encrypt back to `.pkt`.</p>
                 </div>
@@ -220,229 +219,232 @@ export default function Home() {
           </div>
         </div>
 
-        <Card className="w-full max-w-3xl">
-          <CardContent className="space-y-4 pt-6">
-            <input
-              ref={inputRef}
-              type="file"
-              accept=".xml,.pkt,.pka"
-              className="hidden"
-              onChange={(event) => applyFile(event.target.files?.[0] ?? null)}
-            />
-
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => inputRef.current?.click()}
-                    onDragOver={(event) => event.preventDefault()}
-                    onDrop={(event) => {
-                      event.preventDefault();
-                      applyFile(event.dataTransfer.files?.[0] ?? null);
-                    }}
-                    className="flex min-h-36 w-full flex-col items-center justify-center gap-1 border-dashed bg-muted/30 p-4 text-center transition hover:bg-muted/60"
-                  >
-                    <FileUp className="mb-2 size-5 text-muted-foreground" />
-                    <span className="font-medium">Drop a file here or click to choose</span>
-                    <span className="text-sm text-muted-foreground">Supported: .xml, .pkt, .pka</span>
-                  </Button>
-                }
+        <div className="flex w-full max-w-3xl flex-col gap-4">
+          <h1 className="text-center text-xl font-semibold">Packet Tracer Converter</h1>
+          <Card className="w-full">
+            <CardContent className="space-y-4 pt-6">
+              <input
+                ref={inputRef}
+                type="file"
+                accept=".xml,.pkt,.pka"
+                className="hidden"
+                onChange={(event) => applyFile(event.target.files?.[0] ?? null)}
               />
-              <TooltipContent>Drop an .xml, .pkt, or .pka file — or click to browse</TooltipContent>
-            </Tooltip>
 
-            {file ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="outline">{file.name}</Badge>
-                <Badge variant="secondary">{fileMode?.toUpperCase() ?? "UNKNOWN"}</Badge>
-              </div>
-            ) : (
-              <Alert>
-                <AlertTitle>No file selected</AlertTitle>
-                <AlertDescription>Select a file to display operation controls.</AlertDescription>
-              </Alert>
-            )}
-
-            {fileMode === "packet" && (
-              <div className="space-y-3 rounded-lg border p-3">
-                <div className="text-sm font-medium">Decrypt options</div>
-                <RadioGroup
-                  value={decryptTarget}
-                  onValueChange={(value) => {
-                    setDecryptTarget(value as DecryptTarget);
-                    clearResult();
-                  }}
-                >
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <div className="inline-flex w-fit items-center gap-2">
-                          <RadioGroupItem id="target-json" value="json" />
-                          <Label htmlFor="target-json" className="text-sm cursor-pointer">
-                            Decrypt to simplified JSON
-                          </Label>
-                        </div>
-                      }
-                    />
-                    <TooltipContent>Topology data, LLM-friendly, smaller</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <div className="inline-flex w-fit items-center gap-2">
-                          <RadioGroupItem id="target-xml" value="xml" />
-                          <Label htmlFor="target-xml" className="text-sm cursor-pointer">
-                            Decrypt to native XML
-                          </Label>
-                        </div>
-                      }
-                    />
-                    <TooltipContent>Raw Packet Tracer XML, full fidelity</TooltipContent>
-                  </Tooltip>
-                </RadioGroup>
-                {decryptTarget === "json" && (
-                  <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 pt-1">
-                    <Tooltip>
-                      <TooltipTrigger
-                        render={
-                          <div className="flex items-center gap-2">
-                            <Label htmlFor="indent" className="text-sm">
-                              Indentation
-                            </Label>
-                            <Select
-                              value={indent}
-                              onValueChange={(value) => {
-                                setIndent(value ?? "2");
-                                clearResult();
-                              }}
-                            >
-                              <SelectTrigger id="indent" className="w-32">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="0">Compact</SelectItem>
-                                <SelectItem value="2">2 spaces</SelectItem>
-                                <SelectItem value="4">4 spaces</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        }
-                      />
-                      <TooltipContent>Spaces per indent level in the output JSON</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger
-                        render={
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              id="pretty"
-                              checked={prettyPrint}
-                              onCheckedChange={(value) => {
-                                setPrettyPrint(value);
-                                clearResult();
-                              }}
-                            />
-                            <Label htmlFor="pretty" className="text-sm cursor-pointer">
-                              Pretty print
-                            </Label>
-                          </div>
-                        }
-                      />
-                      <TooltipContent>Newlines &amp; indentation; disable for compact output</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger
-                        render={
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              id="meta"
-                              checked={includeMetadata}
-                              onCheckedChange={(value) => {
-                                setIncludeMetadata(Boolean(value));
-                                clearResult();
-                              }}
-                            />
-                            <Label htmlFor="meta" className="text-sm cursor-pointer">
-                              Include metadata
-                            </Label>
-                          </div>
-                        }
-                      />
-                      <TooltipContent>Include file version, build info and other PT metadata</TooltipContent>
-                    </Tooltip>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {fileMode && (
               <Tooltip>
                 <TooltipTrigger
                   render={
                     <Button
-                      onClick={runOperation}
-                      disabled={isProcessing}
-                      className="w-full"
+                      type="button"
+                      variant="outline"
+                      onClick={() => inputRef.current?.click()}
+                      onDragOver={(event) => event.preventDefault()}
+                      onDrop={(event) => {
+                        event.preventDefault();
+                        applyFile(event.dataTransfer.files?.[0] ?? null);
+                      }}
+                      className="flex min-h-36 w-full flex-col items-center justify-center gap-1 border-dashed bg-muted/30 p-4 text-center transition hover:bg-muted/60"
                     >
-                      {isProcessing ? (
-                        <>
-                          <Loader2 className="size-4 animate-spin" />
-                          Processing…
-                        </>
-                      ) : fileMode === "xml" ? (
-                        <>
-                          <Lock className="size-4" />
-                          Encrypt
-                        </>
-                      ) : (
-                        <>
-                          <LockOpen className="size-4" />
-                          Decrypt
-                        </>
-                      )}
+                      <FileUp className="mb-2 size-5 text-muted-foreground" />
+                      <span className="font-medium">Drop a file here or click to choose</span>
+                      <span className="text-sm text-muted-foreground">Supported: .xml, .pkt, .pka</span>
                     </Button>
                   }
                 />
-                <TooltipContent>
-                  {fileMode === "xml"
-                    ? "Wrap XML in the Packet Tracer .pkt container"
-                    : "Unwrap the .pkt / .pka to your chosen format"}
-                </TooltipContent>
+                <TooltipContent>Drop an .xml, .pkt, or .pka file — or click to browse</TooltipContent>
               </Tooltip>
-            )}
 
-            {resultBytes && resultFilename && (
-              <Alert>
-                <AlertTitle>Output ready</AlertTitle>
-                <AlertDescription>
-                  {resultFilename} ({resultBytes.length.toLocaleString()}{" "}bytes). Use the &quot;Download
-                  result&quot; button to save.
-                </AlertDescription>
-              </Alert>
-            )}
-            {resultBytes && (
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      variant="default"
-                      onClick={() =>
-                        downloadContent(resultBytes, resultFilename, resultMime)
-                      }
-                      className="w-full"
-                    >
-                      <Download className="size-4" />
-                      Download result
-                    </Button>
-                  }
-                />
-                <TooltipContent>Save {resultFilename || "the output file"}</TooltipContent>
-              </Tooltip>
-            )}
-          </CardContent>
-        </Card>
+              {file ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="outline">{file.name}</Badge>
+                  <Badge variant="secondary">{fileMode?.toUpperCase() ?? "UNKNOWN"}</Badge>
+                </div>
+              ) : (
+                <Alert>
+                  <AlertTitle>No file selected</AlertTitle>
+                  <AlertDescription>Select a file to display operation controls.</AlertDescription>
+                </Alert>
+              )}
+
+              {fileMode === "packet" && (
+                <div className="space-y-3 rounded-lg border p-3">
+                  <div className="text-sm font-medium">Decrypt options</div>
+                  <RadioGroup
+                    value={decryptTarget}
+                    onValueChange={(value) => {
+                      setDecryptTarget(value as DecryptTarget);
+                      clearResult();
+                    }}
+                  >
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <div className="inline-flex w-fit items-center gap-2">
+                            <RadioGroupItem id="target-json" value="json" />
+                            <Label htmlFor="target-json" className="text-sm cursor-pointer">
+                              Decrypt to simplified JSON
+                            </Label>
+                          </div>
+                        }
+                      />
+                      <TooltipContent>Topology data, AI-friendly, smaller</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <div className="inline-flex w-fit items-center gap-2">
+                            <RadioGroupItem id="target-xml" value="xml" />
+                            <Label htmlFor="target-xml" className="text-sm cursor-pointer">
+                              Decrypt to native XML
+                            </Label>
+                          </div>
+                        }
+                      />
+                      <TooltipContent>Raw Packet Tracer XML, full fidelity</TooltipContent>
+                    </Tooltip>
+                  </RadioGroup>
+                  {decryptTarget === "json" && (
+                    <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 pt-1">
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <div className="flex items-center gap-2">
+                              <Label htmlFor="indent" className="text-sm">
+                                Indentation
+                              </Label>
+                              <Select
+                                value={indent}
+                                onValueChange={(value) => {
+                                  setIndent(value ?? "2");
+                                  clearResult();
+                                }}
+                              >
+                                <SelectTrigger id="indent" className="w-32">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="0">Compact</SelectItem>
+                                  <SelectItem value="2">2 spaces</SelectItem>
+                                  <SelectItem value="4">4 spaces</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          }
+                        />
+                        <TooltipContent>Spaces per indent level in the output JSON</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                id="pretty"
+                                checked={prettyPrint}
+                                onCheckedChange={(value) => {
+                                  setPrettyPrint(value);
+                                  clearResult();
+                                }}
+                              />
+                              <Label htmlFor="pretty" className="text-sm cursor-pointer">
+                                Pretty print
+                              </Label>
+                            </div>
+                          }
+                        />
+                        <TooltipContent>Newlines &amp; indentation; disable for compact output</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <div className="flex items-center gap-2">
+                              <Checkbox
+                                id="meta"
+                                checked={includeMetadata}
+                                onCheckedChange={(value) => {
+                                  setIncludeMetadata(Boolean(value));
+                                  clearResult();
+                                }}
+                              />
+                              <Label htmlFor="meta" className="text-sm cursor-pointer">
+                                Include metadata
+                              </Label>
+                            </div>
+                          }
+                        />
+                        <TooltipContent>Include file version, build info and other PT metadata</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {fileMode && (
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        onClick={runOperation}
+                        disabled={isProcessing}
+                        className="w-full"
+                      >
+                        {isProcessing ? (
+                          <>
+                            <Loader2 className="size-4 animate-spin" />
+                            Processing…
+                          </>
+                        ) : fileMode === "xml" ? (
+                          <>
+                            <Lock className="size-4" />
+                            Encrypt
+                          </>
+                        ) : (
+                          <>
+                            <LockOpen className="size-4" />
+                            Decrypt
+                          </>
+                        )}
+                      </Button>
+                    }
+                  />
+                  <TooltipContent>
+                    {fileMode === "xml"
+                      ? "Wrap XML in the Packet Tracer .pkt container"
+                      : "Unwrap the .pkt / .pka to your chosen format"}
+                  </TooltipContent>
+                </Tooltip>
+              )}
+
+              {resultBytes && resultFilename && (
+                <Alert>
+                  <AlertTitle>Output ready</AlertTitle>
+                  <AlertDescription>
+                    {resultFilename} ({resultBytes.length.toLocaleString()}{" "}bytes). Use the &quot;Download
+                    result&quot; button to save.
+                  </AlertDescription>
+                </Alert>
+              )}
+              {resultBytes && (
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="default"
+                        onClick={() =>
+                          downloadContent(resultBytes, resultFilename, resultMime)
+                        }
+                        className="w-full"
+                      >
+                        <Download className="size-4" />
+                        Download result
+                      </Button>
+                    }
+                  />
+                  <TooltipContent>Save {resultFilename || "the output file"}</TooltipContent>
+                </Tooltip>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <AboutSection />
@@ -452,46 +454,46 @@ export default function Home() {
 
 const FAQ: { question: string; answer: string }[] = [
   {
-    question: "What ends up in the JSON?",
+    question: "How do I give my Packet Tracer lab to ChatGPT, Claude or another AI?",
     answer:
-      "devices keyed by hostname (type, model, config lines, ports with IP, mask and MAC, VLANs, VTP), links resolved to device names and ports, notes, the activity instructions from .pka files, and optional metadata. The rest of the XML is left out, which is what keeps it small enough for a context window.",
+      "Drop the .pkt or .pka above, keep \"Decrypt to simplified JSON\" selected and press Decrypt. Download the .json and attach or paste it at the start of the chat, then ask your question, for example why a ping fails or what is still missing from the activity.",
   },
   {
-    question: "JSON or XML: which one should I give the model?",
+    question: "Why not just send the AI a screenshot?",
     answer:
-      "JSON, almost always. It carries the same configs and addressing in a fraction of the size. Use native XML only when you need something the JSON leaves out, and expect it to be much larger.",
+      "A screenshot only shows the layout. The JSON carries what the AI actually needs to troubleshoot: every device's config lines, IP addresses and masks, VLANs, and which port is cabled to which.",
   },
   {
-    question: "Metadata and pretty print: on or off?",
+    question: "JSON or XML: which one should I use?",
     answer:
-      "Metadata only adds the file name, counts and converter info, so turn it off to save tokens. Compact output saves a bit more; models read both equally well.",
+      "JSON for AI, almost always. It keeps the configs and addressing but is far smaller. Choose native XML only when you need the complete file, for example to edit it. To save even more space, turn off metadata and pretty print.",
   },
   {
-    question: "Can the model's edits go back into Packet Tracer?",
+    question: "Can I edit the lab and open it in Packet Tracer again?",
     answer:
-      "Only through XML. Decrypt to native XML, edit it, drop the .xml back in and press Encrypt to get a .pkt. The JSON is a one-way summary.",
+      "Yes, through XML. Decrypt to native XML, edit it, then drop the .xml back in and press Encrypt to get a .pkt. The JSON is a one-way summary and can't be turned back into a .pkt.",
   },
   {
-    question: "Is the file uploaded?",
+    question: "Is my file uploaded anywhere?",
     answer:
-      "No. Decryption and conversion run in a Web Worker in your browser and nothing is sent to a server. What you paste into the LLM afterwards is up to you.",
+      "No. Everything runs in your browser and nothing is sent to a server. It's free and needs no account.",
+  },
+  {
+    question: "Why does my file fail to decrypt?",
+    answer:
+      "The file is verified before it is unpacked. If that check fails, the file is damaged, isn't a Packet Tracer .pkt or .pka, or was saved in a format this tool doesn't read.",
   },
 ];
 
 function AboutSection() {
   return (
     <section className="mx-auto w-full max-w-3xl space-y-4 px-4 pb-12 text-sm text-muted-foreground">
-      <h2 className="text-base font-medium text-foreground">Packet Tracer labs as LLM context</h2>
+      <h2 className="text-base font-medium text-foreground">Packet Tracer labs as AI context</h2>
       <p>
-        A screenshot of a Packet Tracer lab gives an LLM a picture to guess from, and the .pkt itself is
-        encrypted, so the model can&apos;t read it. This decrypts .pkt and .pka files and turns them into compact
-        JSON the model can reason over: every device with its config, interfaces and addressing, the VLANs, the
-        cabling between devices and, for .pka activities, the task instructions.
-      </p>
-      <p>
-        Attach the JSON at the start of a chat, then ask why a ping fails, what is left to configure, or for a
-        review of the configs. Need the full file instead? Decrypt to native XML, and encrypt edited XML back to
-        .pkt.
+        A screenshot of a Packet Tracer lab gives an AI a picture to guess from, and the .pkt itself is encrypted,
+        so the AI can&apos;t read it. This decrypts .pkt and .pka files and turns them into compact JSON it can reason
+        over: every device with its config, interfaces and addressing, the VLANs, the cabling between devices and,
+        for .pka activities, the task instructions.
       </p>
       <div className="space-y-2">
         {FAQ.map(({ question, answer }) => (

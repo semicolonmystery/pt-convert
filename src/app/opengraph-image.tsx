@@ -71,7 +71,7 @@ export default function OpengraphImage() {
             maxWidth: 900,
           }}
         >
-          Convert .pkt &amp; .pka to XML or LLM-friendly JSON — fully in your browser.
+          Convert .pkt &amp; .pka to XML or AI-friendly JSON — fully in your browser.
         </div>
       </div>
     ),
