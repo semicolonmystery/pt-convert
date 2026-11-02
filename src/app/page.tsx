@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Download, FileUp, Loader2, Lock, LockOpen } from "lucide-react";
+import { Download, FileUp, Heart, Loader2, Lock, LockOpen } from "lucide-react";
 import { toast } from "sonner";
 
 import { ModeToggle } from "@/components/mode-toggle";
@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -34,6 +35,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { REPO_URL, SPONSOR_URL } from "@/lib/site";
 import type { WorkerRequest, WorkerResponse, WorkerResult } from "@/workers/packet-worker-protocol";
 
 type FileMode = "xml" | "packet" | null;
@@ -185,41 +187,48 @@ export default function Home() {
 
   return (
     <main className="flex w-full flex-col">
-      <div className="relative flex min-h-screen w-full snap-start items-center justify-center p-4">
-        <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between p-4 md:p-6">
-          <div className="pointer-events-auto">
-            <Dialog>
-              <DialogTrigger
-                render={
-                  <Button variant="outline" size="sm">
-                    How it works
-                  </Button>
-                }
-              />
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>What this tool is for</DialogTitle>
-                  <DialogDescription>
-                    This app converts Packet Tracer files fully in your browser. It helps you decrypt `.pkt/.pka` to
-                    native XML or to simplified JSON that is easier for AI to reason about.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <p>1. Drop a `.pkt/.pka` file and pick JSON or XML output.</p>
-                  <p>2. For AI work, choose JSON and keep metadata enabled.</p>
-                  <p>3. Download the result and feed JSON into your model for topology analysis.</p>
-                  <p>4. Drop `.xml` when you want to re-encrypt back to `.pkt`.</p>
-                </div>
-                <DialogFooter showCloseButton />
-              </DialogContent>
-            </Dialog>
-          </div>
-          <div className="pointer-events-auto">
+      <div className="grid min-h-svh w-full snap-start grid-rows-[1fr_auto_1fr]">
+        <header className="flex items-center justify-between self-start p-4 md:p-6">
+          <Dialog>
+            <DialogTrigger
+              render={
+                <Button variant="outline" size="sm">
+                  How it works
+                </Button>
+              }
+            />
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>What this tool is for</DialogTitle>
+                <DialogDescription>
+                  This app converts Packet Tracer files fully in your browser. It helps you decrypt `.pkt/.pka` to
+                  native XML or to simplified JSON that is easier for AI to reason about.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p>1. Drop a `.pkt/.pka` file and pick JSON or XML output.</p>
+                <p>2. For AI work, choose JSON and keep metadata enabled.</p>
+                <p>3. Download the result and feed JSON into your model for topology analysis.</p>
+                <p>4. Drop `.xml` when you want to re-encrypt back to `.pkt`.</p>
+              </div>
+              <DialogFooter showCloseButton />
+            </DialogContent>
+          </Dialog>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Sponsor on GitHub"
+              nativeButton={false}
+              render={<a href={SPONSOR_URL} target="_blank" rel="noopener noreferrer" />}
+            >
+              <Heart />
+            </Button>
             <ModeToggle />
           </div>
-        </div>
+        </header>
 
-        <div className="flex w-full max-w-3xl flex-col gap-4">
+        <div className="flex w-full max-w-3xl flex-col gap-4 justify-self-center p-4">
           <h1 className="text-center text-xl font-semibold">Packet Tracer Converter</h1>
           <Card className="w-full">
             <CardContent className="space-y-4 pt-6">
@@ -243,7 +252,7 @@ export default function Home() {
                         event.preventDefault();
                         applyFile(event.dataTransfer.files?.[0] ?? null);
                       }}
-                      className="flex min-h-36 w-full flex-col items-center justify-center gap-1 border-dashed bg-muted/30 p-4 text-center transition hover:bg-muted/60"
+                      className="flex min-h-36 w-full flex-col items-center justify-center gap-1 border-dashed bg-muted/30 p-4 text-center whitespace-normal transition hover:bg-muted/60"
                     >
                       <FileUp className="mb-2 size-5 text-muted-foreground" />
                       <span className="font-medium">Drop a file here or click to choose</span>
@@ -487,7 +496,7 @@ const FAQ: { question: string; answer: string }[] = [
 
 function AboutSection() {
   return (
-    <section className="mx-auto flex min-h-screen w-full max-w-3xl snap-start flex-col justify-center gap-4 px-4 py-12 text-sm text-muted-foreground">
+    <section className="mx-auto flex min-h-svh w-full max-w-3xl snap-start flex-col justify-center gap-4 px-4 py-12 text-sm text-muted-foreground">
       <h2 className="text-base font-medium text-foreground">Packet Tracer labs as AI context</h2>
       <p>
         A screenshot of a Packet Tracer lab gives an AI a picture to guess from, and the .pkt itself is encrypted,
@@ -503,9 +512,20 @@ function AboutSection() {
           </details>
         ))}
       </div>
-      <p className="text-xs">
-        Not affiliated with Cisco Systems. Cisco Packet Tracer is a trademark of Cisco Systems, Inc.
-      </p>
+      <footer className="space-y-3 text-xs">
+        <p>Not affiliated with Cisco Systems. Cisco Packet Tracer is a trademark of Cisco Systems, Inc.</p>
+        <Separator />
+        <p>
+          <a
+            href={REPO_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-foreground underline underline-offset-4 hover:text-foreground/80"
+          >
+            GitHub repository
+          </a>
+        </p>
+      </footer>
     </section>
   );
 }
