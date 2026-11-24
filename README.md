@@ -50,7 +50,7 @@ Encryption and decryption, plus the XML-to-JSON simplification, run inside a mod
 - `src/app/layout.tsx` – root layout, metadata, JSON-LD
 - `src/lib/site.ts` – shared site URL, name, title and description
 - `src/app/sitemap.ts` / `src/app/robots.ts` – sitemap.xml and robots.txt for search engines
-- `src/app/opengraph-image.tsx` – generated 1200×630 social card
+- `src/app/og.png/route.tsx` – 1200×630 social card, generated at build time to `og.png`
 - `src/lib/packet-crypto.ts` – packet encryption/decryption pipeline
 - `src/lib/xml-simplifier.ts` – XML -> simplified JSON mapping
 - `src/workers/packet-worker.ts` – off-main-thread runner for crypto + simplifier

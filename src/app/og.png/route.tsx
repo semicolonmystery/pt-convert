@@ -1,11 +1,14 @@
 import { ImageResponse } from "next/og";
 
-export const dynamic = "force-static";
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
-export const alt = "Packet Tracer Converter — client-side PKT/PKA converter";
+import { OG_IMAGE } from "@/lib/site";
 
-export default function OpengraphImage() {
+// The Open Graph and Twitter image, rendered once at build time to out/og.png.
+// A route handler instead of the opengraph-image.tsx convention: in a static export
+// that convention writes an extensionless `opengraph-image` file, which GitHub Pages
+// would serve as application/octet-stream instead of image/png.
+export const dynamic = "force-static";
+
+export function GET() {
   return new ImageResponse(
     (
       <div
@@ -75,6 +78,6 @@ export default function OpengraphImage() {
         </div>
       </div>
     ),
-    size,
+    { width: OG_IMAGE.width, height: OG_IMAGE.height },
   );
 }

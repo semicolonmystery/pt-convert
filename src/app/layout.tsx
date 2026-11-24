@@ -4,7 +4,7 @@ import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
+import { OG_IMAGE, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
@@ -50,11 +50,13 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     url: "/",
+    images: [OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
+    images: [OG_IMAGE],
   },
   robots: {
     index: true,
@@ -84,7 +86,7 @@ const jsonLd = {
   name: SITE_NAME,
   description: SITE_DESCRIPTION,
   url: `${SITE_URL}/`,
-  image: `${SITE_URL}/opengraph-image`,
+  image: `${SITE_URL}${OG_IMAGE.url}`,
   author: { "@type": "Person", name: "Semicolon Mystery" },
   isAccessibleForFree: true,
   applicationCategory: "DeveloperApplication",
